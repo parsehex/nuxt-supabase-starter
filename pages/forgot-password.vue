@@ -8,14 +8,14 @@
   })
 
   useSeoMeta({
-    title: 'Forgot Passwrod - Nuxt Supabase Starter',
+    title: 'Forgot Password',
   })
 
   const { auth } = useSupabaseClient()
   const toast = useToast()
   const { errorHandler } = useErrorHandler()
   const runtimeConfig = useRuntimeConfig();
-  
+
   const form = reactive({
     email: undefined,
   })
@@ -64,7 +64,7 @@
             <UForm :schema="forgotPasswordValidation" :state="form" class="space-y-2" @submit="sendForgotPassworEmail">
               <div class="space-y-4">
                 <div class="flex justify-center">
-                  <img src="/icon.svg" class="h-[80px]">
+                  <img src="/favicon.png" class="h-[80px] rounded-lg">
                 </div>
 
                 <p class="text-lg font-bold text-center">Enter email that are registered on the platform</p>
@@ -73,7 +73,7 @@
                   <UInput v-model="form.email" />
                 </UFormGroup>
 
-                <UButton 
+                <UButton
                 :loading="isLoading"
                 :disabled="isLoading"
                 type="submit" label="Send Reset Password Link" color="gray" block />

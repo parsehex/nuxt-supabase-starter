@@ -13,7 +13,7 @@
       window.addEventListener('resize', () =>{
         if(window.innerWidth < 768) menuOpen.value = false
       })
-  
+
       if(window.innerWidth < 768) menuOpen.value = false
     }
   })
@@ -35,19 +35,13 @@
     exactMatch: true,
     to: '/dashboard'
   },{
-    label: 'Code Editor',
-    icon: 'i-lucide-terminal-square',
-    exact: true,
-    exactQuery: true,
-    exactMatch: true,
-    to: '/dashboard/code-editor'
+    label: 'Projects',
+    icon: 'i-lucide-folder',
+    to: '/dashboard/projects'
   }, {
-    label: 'Storage',
-    icon: 'i-lucide-archive-restore',
-    exact: true,
-    exactQuery: true,
-    exactMatch: true,
-    to: '/dashboard/storage'
+    label: 'Files',
+    icon: 'i-lucide-files',
+    to: '/dashboard/files'
   }])
 
   const linksBottomNav = [{
@@ -88,16 +82,15 @@
       <div class="py-2 flex flex-col justify-between h-[100vh] bg-background">
         <div class="flex flex-col gap-3">
           <NuxtLink to="/dashboard">
-            <div class="flex items-center justify-start gap-2">
-              <img src="/icon.svg" class="h-[60px]">
-              <p class="text-lg leading-tight -mt-1">
-                Nuxt Supabase <br> 
-                Starter
+            <div class="flex items-center justify-start gap-4 p-2">
+              <img src="/favicon.png" class="h-8 w-8 rounded">
+              <p class="text-xl font-bold tracking-tight">
+                Client Portal
               </p>
             </div>
           </NuxtLink>
 
-          <UVerticalNavigation 
+          <UVerticalNavigation
           :links="linksTopNav">
           <template #default="{ link, isActive }">
             <span class="group-hover:text-primary relative py-2">{{ link.label }}</span>
@@ -106,7 +99,7 @@
         </div>
 
         <div class="flex flex-col">
-          <UVerticalNavigation 
+          <UVerticalNavigation
           :links="linksBottomNav">
           <template #default="{ link }">
             <span class="group-hover:text-primary relative py-2">
@@ -115,7 +108,7 @@
             </span>
           </template>
           </UVerticalNavigation>
-          
+
           <div class="flex items-center justify-between p-3">
             <div class="flex items-center gap-2">
               <UAvatar

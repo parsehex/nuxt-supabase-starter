@@ -1,7 +1,7 @@
 {
-  "name": "nuxt-supabase-starter",
-  "author": "jungrama",
-  "private": false,
+  "name": "parsehex-client-portal",
+  "author": "parsehex",
+  "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {

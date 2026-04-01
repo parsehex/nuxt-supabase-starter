@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import { charts } from '~/static/static-dashboard'
-  
+
   useSeoMeta({
-    title: 'Dashboard - Nuxt Supabase Starter',
+    title: 'Dashboard - parsehex Client Portal',
   })
 </script>
 
@@ -18,7 +18,7 @@
             </div>
             <p class="mb-0 text-lg opacity-60">{{item.title}}</p>
           </div>
-          
+
           <div class="mt-3 mb-14">
             <p class="opacity-60 text-sm">{{ item.subTitle }}</p>
             <p class="text-foreground font-normal text-2xl -mt-1">{{Intl.NumberFormat().format(item.total)}}</p>
@@ -27,9 +27,9 @@
         </UCard>
       </div>
     </div>
-    
+
     <!-- /* ------------------------------- Welcome Message ------------------------------ */ -->
-    
+
     <h1 class="text-2xl font-bold pt-5 max-w-[400px]">
       Welcome to Nuxt Supabase Starter
     </h1>

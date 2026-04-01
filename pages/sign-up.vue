@@ -2,13 +2,13 @@
   import { signUpValidation, type SchemaSignUpValidation } from '~/utils/formValidation'
   import type { FormSubmitEvent } from '#ui/types'
   import { BaseError, useErrorHandler } from '~/composables/use-error-handler'
-  
+
   definePageMeta({
     middleware: 'guest'
   })
 
   useSeoMeta({
-    title: 'Sign Up - Nuxt Supabase Starter',
+    title: 'Sign Up',
   })
 
   const { auth } = useSupabaseClient()
@@ -57,7 +57,7 @@
   const signUpWithProvider = async (provider: 'GITHUB' | 'GOOGLE') =>  {
     try {
       isLoading.value = true
-      
+
       let signUp = null
 
       if(provider === 'GITHUB') {
@@ -92,7 +92,7 @@
             <UForm :schema="signUpValidation" :state="form" class="space-y-2" @submit="signUpWithCredential">
               <div class="space-y-4">
                 <div class="flex justify-center">
-                  <img src="/icon.svg" class="h-[80px]">
+                  <img src="/favicon.png" class="h-[80px] rounded-lg">
                 </div>
 
                 <p class="text-lg font-bold text-center">Register an account by entering your email and password.</p>
@@ -105,7 +105,7 @@
                   <UInput v-model="form.password" type="password" />
                 </UFormGroup>
 
-                <UButton 
+                <UButton
                 :loading="isLoading"
                 :disabled="isLoading"
                 type="submit" label="Register" color="gray" block />
@@ -113,10 +113,10 @@
               <UDivider label="or" color="gray" orientation="vertical" />
 
               <div class="space-y-4 flex flex-col justify-center">
-                <UButton 
+                <UButton
                 @click="signUpWithProvider('GITHUB')"
                 :disabled="isLoading"
-                color="black" label="Continue with GitHub" 
+                color="black" label="Continue with GitHub"
                 icon="i-lucide-github" block />
               </div>
             </UForm>

@@ -8,13 +8,13 @@
   })
 
   useSeoMeta({
-    title: 'Sign In - Nuxt Supabase Starter',
+    title: 'Sign In',
   })
 
   const { auth } = useSupabaseClient()
   const { errorHandler } = useErrorHandler()
   const runtimeConfig = useRuntimeConfig()
-  
+
   const form = reactive({
     email: undefined,
     password: undefined
@@ -30,7 +30,7 @@
   const signInWithCredential = async (event: FormSubmitEvent<SchemaSignInValidation>) => {
     try {
       isLoading.value = true
-      
+
       const signIn = await auth.signInWithPassword({
         email: form.email ?? '',
         password: form.password ?? ''
@@ -56,7 +56,7 @@
   const signInWithProvider = async (provider: 'GITHUB' | 'GOOGLE') =>  {
     try {
       isLoading.value = true
-      
+
       let signIn = null
 
       if(provider === 'GITHUB') {
@@ -90,10 +90,10 @@
             <UForm :schema="signInValidation" :state="form" class="space-y-2" @submit="signInWithCredential">
               <div class="space-y-4">
                 <div class="flex justify-center">
-                  <img src="/icon.svg" class="h-[80px]">
+                  <img src="/favicon.png" class="h-[80px] rounded-lg">
                 </div>
 
-                <p class="text-lg font-bold text-center">Welcome Back, enter your credential below.</p>
+                <p class="text-lg font-bold text-center">Welcome to parsehex</p>
 
                 <UFormGroup label="Email" name="email">
                   <UInput v-model="form.email" />
@@ -107,7 +107,7 @@
                   <NuxtLink to="/forgot-password" class="underline">click here</NuxtLink>
                 </div>
 
-                <UButton 
+                <UButton
                 :loading="isLoading"
                 :disabled="isLoading"
                 type="submit" label="Login" color="gray" block />
@@ -115,10 +115,10 @@
               <UDivider label="or" color="gray" orientation="vertical" />
 
               <div class="space-y-4 flex flex-col justify-center">
-                <UButton 
+                <UButton
                 @click="signInWithProvider('GITHUB')"
                 :disabled="isLoading"
-                color="black" label="Continue with GitHub" 
+                color="black" label="Continue with GitHub"
                 icon="i-lucide-github" block />
               </div>
             </UForm>

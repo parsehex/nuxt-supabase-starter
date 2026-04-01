@@ -4,13 +4,13 @@
   import { BaseError, useErrorHandler } from '~/composables/use-error-handler'
 
   useSeoMeta({
-    title: 'Reset Password - Nuxt Supabase Starter',
+    title: 'Reset Password',
   })
 
   const { auth } = useSupabaseClient()
   const toast = useToast()
   const { errorHandler } = useErrorHandler()
-  
+
   const form = reactive({
     password: undefined
   })
@@ -59,7 +59,7 @@
             <UForm :schema="resetPasswordValidation" :state="form" class="space-y-2" @submit="signInWithCredential">
               <div class="space-y-4">
                 <div class="flex justify-center">
-                  <img src="/icon.svg" class="h-[80px]">
+                  <img src="/favicon.png" class="h-[80px] rounded-lg">
                 </div>
 
                 <p class="text-lg font-bold text-center">Enter new password below!</p>
@@ -68,7 +68,7 @@
                   <UInput v-model="form.password" type="password" />
                 </UFormGroup>
 
-                <UButton 
+                <UButton
                 :loading="isLoading"
                 :disabled="isLoading"
                 type="submit" label="Reset Password" color="gray" block />

@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
 	app: {
 		head: {
-			title: 'Nuxt Supabase Starter - Supercharged Your Project',
+			title: 'parsehex Client Portal',
 			htmlAttrs: {
 				lang: 'en',
 			},
@@ -11,7 +11,7 @@ export default defineNuxtConfig({
 					hid: 'description',
 					name: 'description',
 					content:
-						'Nuxt and Supabase Starer to help you kickstart your next project.',
+						'Client portal and project management for parsehex.',
 				},
 				{ hid: 'og:image', name: 'og:image', content: '/og-image.png' },
 			],
