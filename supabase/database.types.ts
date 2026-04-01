@@ -57,6 +57,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_updates: {
+        Row: {
+          author_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          project_id: string
+          title: string
+          update_type: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          project_id: string
+          title: string
+          update_type?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          project_id?: string
+          title?: string
+          update_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           client_id: string
