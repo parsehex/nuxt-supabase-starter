@@ -209,8 +209,8 @@
                                         <UButton color="red" variant="ghost" size="xs" icon="i-lucide-trash" class="opacity-0 group-hover:opacity-100 transition-opacity" @click="deleteUpdate(update.id)" />
                                     </div>
                                     <span class="text-xs text-primary font-medium mt-0.5 block">{{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}</span>
-                                    <p v-if="update.status === 'rejected' && update.rejection_comment" class="mt-2 text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded">
-                                        <strong>Rejection:</strong> {{ update.rejection_comment }}
+                                    <p v-if="update.client_feedback" class="mt-2 text-xs p-2 rounded" :class="update.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'">
+                                        <strong>Client Feedback:</strong> {{ update.client_feedback }}
                                     </p>
                                     <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
                                         {{ update.description }}

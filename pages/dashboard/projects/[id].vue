@@ -17,13 +17,11 @@
   const updates = ref<any[]>([])
   const isLoading = ref(true)
 
-  const isApproving = ref<string | null>(null)
-  const isRejecting = ref<string | null>(null)
-  
-  const rejectionModal = reactive({
-    isOpen: false,
-    updateId: '',
-    comment: ''
+  const feedbackForm = reactive({
+    activeUpdateId: null as string | null,
+    actionType: null as 'approved' | 'rejected' | null,
+    comment: '',
+    isSubmitting: false
   })
 
   // Computed for sidebar action items
@@ -62,53 +60,50 @@
     isLoading.value = false
   }
 
-  const approveUpdate = async (updateId: string) => {
-    try {
-        isApproving.value = updateId
-        const { error } = await supabase
-            .from('project_updates')
-            .update({
-                status: 'approved',
-                approved_at: new Date().toISOString(),
-                approved_by: user.value?.id
-            })
-            .eq('id', updateId)
-
-        if (error) throw error
-        await fetchProjectDetails()
-    } catch (e: any) {
-        errorHandler(new BaseError(e.code, e.message))
-    } finally {
-        isApproving.value = null
+  const toggleFeedbackForm = (updateId: string, type: 'approved' | 'rejected') => {
+    if (feedbackForm.activeUpdateId === updateId && feedbackForm.actionType === type) {
+      feedbackForm.activeUpdateId = null
+      feedbackForm.actionType = null
+      feedbackForm.comment = ''
+    } else {
+      feedbackForm.activeUpdateId = updateId
+      feedbackForm.actionType = type
+      feedbackForm.comment = ''
     }
   }
 
-  const openRejectionModal = (updateId: string) => {
-    rejectionModal.updateId = updateId
-    rejectionModal.comment = ''
-    rejectionModal.isOpen = true
-  }
+  const submitAction = async () => {
+    if (!feedbackForm.activeUpdateId || !feedbackForm.actionType) return
 
-  const submitRejection = async () => {
     try {
-        isRejecting.value = rejectionModal.updateId
+        feedbackForm.isSubmitting = true
+
+        const updateData: any = {
+            status: feedbackForm.actionType,
+            client_feedback: feedbackForm.comment || null
+        }
+
+        if (feedbackForm.actionType === 'approved') {
+            updateData.approved_at = new Date().toISOString()
+            updateData.approved_by = user.value?.id
+        }
+
         const { error } = await supabase
             .from('project_updates')
-            .update({
-                status: 'rejected',
-                rejection_comment: rejectionModal.comment
-            })
-            .eq('id', rejectionModal.updateId)
+            .update(updateData)
+            .eq('id', feedbackForm.activeUpdateId)
 
         if (error) throw error
-        
-        rejectionModal.isOpen = false
-        rejectionModal.comment = ''
+
+        // Reset and refresh
+        feedbackForm.activeUpdateId = null
+        feedbackForm.actionType = null
+        feedbackForm.comment = ''
         await fetchProjectDetails()
     } catch (e: any) {
         errorHandler(new BaseError(e.code, e.message))
     } finally {
-        isRejecting.value = null
+        feedbackForm.isSubmitting = false
     }
   }
 
@@ -171,9 +166,9 @@
                                         </div>
                                     </div>
                                     <span class="text-xs text-primary font-medium mt-0.5 block">{{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}</span>
-                                    
-                                    <p v-if="update.status === 'rejected' && update.rejection_comment" class="mt-2 text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded">
-                                        <strong>Rejection Reason:</strong> {{ update.rejection_comment }}
+
+                                    <p v-if="update.client_feedback" class="mt-2 text-xs p-2 rounded" :class="update.status === 'rejected' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'">
+                                        <strong>Client Feedback:</strong> {{ update.client_feedback }}
                                     </p>
 
                                     <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
@@ -181,13 +176,50 @@
                                     </p>
 
                                     <!-- Approval Actions -->
-                                    <div v-if="update.requires_approval && update.status === 'pending'" class="mt-4 flex gap-2 border-t border-gray-100 dark:border-gray-800 pt-3">
-                                        <UButton size="sm" color="emerald" icon="i-lucide-check" :loading="isApproving === update.id" @click="approveUpdate(update.id)">
-                                            Approve
-                                        </UButton>
-                                        <UButton size="sm" color="red" variant="soft" icon="i-lucide-x" :loading="isRejecting === update.id" @click="openRejectionModal(update.id)">
-                                            Reject
-                                        </UButton>
+                                    <div v-if="update.requires_approval && update.status === 'pending'" class="mt-4 border-t border-gray-100 dark:border-gray-800 pt-3">
+                                        <div class="flex gap-2 mb-3">
+                                            <UButton
+                                                size="sm"
+                                                :color="feedbackForm.activeUpdateId === update.id && feedbackForm.actionType === 'approved' ? 'emerald' : 'gray'"
+                                                :variant="feedbackForm.activeUpdateId === update.id && feedbackForm.actionType === 'approved' ? 'solid' : 'soft'"
+                                                icon="i-lucide-check"
+                                                @click="toggleFeedbackForm(update.id, 'approved')"
+                                            >
+                                                Approve
+                                            </UButton>
+                                            <UButton
+                                                size="sm"
+                                                :color="feedbackForm.activeUpdateId === update.id && feedbackForm.actionType === 'rejected' ? 'red' : 'gray'"
+                                                :variant="feedbackForm.activeUpdateId === update.id && feedbackForm.actionType === 'rejected' ? 'solid' : 'soft'"
+                                                icon="i-lucide-x"
+                                                @click="toggleFeedbackForm(update.id, 'rejected')"
+                                            >
+                                                Reject
+                                            </UButton>
+                                        </div>
+
+                                        <!-- Inline Feedback Form -->
+                                        <div v-if="feedbackForm.activeUpdateId === update.id" class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800 space-y-3">
+                                            <UFormGroup :label="feedbackForm.actionType === 'approved' ? 'Approval Note (Optional)' : 'Rejection Reason'">
+                                                <UTextarea
+                                                    v-model="feedbackForm.comment"
+                                                    :placeholder="feedbackForm.actionType === 'approved' ? 'e.g. Looks great, proceed!' : 'e.g. Please adjust the brand colors...'"
+                                                    :rows="3"
+                                                />
+                                            </UFormGroup>
+                                            <div class="flex justify-end gap-2">
+                                                <UButton size="xs" color="gray" variant="ghost" @click="feedbackForm.activeUpdateId = null">Cancel</UButton>
+                                                <UButton
+                                                    size="sm"
+                                                    color="gray"
+                                                    :loading="feedbackForm.isSubmitting"
+                                                    :disabled="feedbackForm.actionType === 'rejected' && !feedbackForm.comment"
+                                                    @click="submitAction"
+                                                >
+                                                    Send
+                                                </UButton>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -217,8 +249,8 @@
                                 <p class="text-sm font-bold truncate">{{ item.title }}</p>
                                 <p v-if="item.is_blocker" class="text-[10px] text-red-500 font-bold uppercase tracking-wider">Required Blocker</p>
                                 <div class="mt-2 flex gap-1">
-                                    <UButton size="2xs" color="emerald" @click="approveUpdate(item.id)">Approve</UButton>
-                                    <UButton size="2xs" color="gray" variant="ghost" @click="openRejectionModal(item.id)">Reject</UButton>
+                                    <UButton size="2xs" color="emerald" @click="toggleFeedbackForm(item.id, 'approved')">Approve</UButton>
+                                    <UButton size="2xs" color="gray" variant="ghost" @click="toggleFeedbackForm(item.id, 'rejected')">Reject</UButton>
                                 </div>
                             </div>
                         </div>
@@ -243,31 +275,5 @@
             </div>
         </div>
     </div>
-
-    <!-- Rejection Modal -->
-    <UModal v-model="rejectionModal.isOpen">
-      <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-              Reject Update
-            </h3>
-            <UButton color="gray" variant="ghost" icon="i-lucide-x" class="-my-1" @click="rejectionModal.isOpen = false" />
-          </div>
-        </template>
-
-        <form @submit.prevent="submitRejection" class="space-y-4">
-          <p class="text-sm text-gray-500">Please provide a reason for rejecting this update. This helps us understand what needs to be changed.</p>
-          <UFormGroup label="Rejection Reason">
-            <UTextarea v-model="rejectionModal.comment" required placeholder="e.g. This color doesn't match our branding..." />
-          </UFormGroup>
-          
-          <div class="pt-4 flex justify-end gap-2">
-            <UButton color="gray" variant="soft" @click="rejectionModal.isOpen = false">Cancel</UButton>
-            <UButton type="submit" color="red" :loading="isRejecting === rejectionModal.updateId">Submit Rejection</UButton>
-          </div>
-        </form>
-      </UCard>
-    </UModal>
   </div>
 </template>

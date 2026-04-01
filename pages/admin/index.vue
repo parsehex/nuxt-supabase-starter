@@ -146,8 +146,8 @@
                     <p class="text-xs text-gray-400">
                       {{ activity.projects?.clients?.name }} • {{ activity.projects?.name }}
                     </p>
-                    <p v-if="activity.status === 'rejected' && activity.rejection_comment" class="mt-2 text-xs text-red-500 italic bg-red-50 dark:bg-red-950 p-2 rounded">
-                      "{{ activity.rejection_comment }}"
+                    <p v-if="activity.client_feedback" class="mt-2 text-xs p-2 rounded" :class="activity.status === 'rejected' ? 'text-red-500 bg-red-50 dark:bg-red-950' : 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950'">
+                      "{{ activity.client_feedback }}"
                     </p>
                   </div>
                 </div>

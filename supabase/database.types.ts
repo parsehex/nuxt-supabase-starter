@@ -62,12 +62,12 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           author_id: string | null
+          client_feedback: string | null
           created_at: string | null
           description: string | null
           id: string
           is_blocker: boolean | null
           project_id: string
-          rejection_comment: string | null
           requires_approval: boolean | null
           status: Database["public"]["Enums"]["approval_status"] | null
           title: string
@@ -77,12 +77,12 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           author_id?: string | null
+          client_feedback?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           is_blocker?: boolean | null
           project_id: string
-          rejection_comment?: string | null
           requires_approval?: boolean | null
           status?: Database["public"]["Enums"]["approval_status"] | null
           title: string
@@ -92,12 +92,12 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           author_id?: string | null
+          client_feedback?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           is_blocker?: boolean | null
           project_id?: string
-          rejection_comment?: string | null
           requires_approval?: boolean | null
           status?: Database["public"]["Enums"]["approval_status"] | null
           title?: string
