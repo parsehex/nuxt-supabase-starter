@@ -10,8 +10,13 @@
   const { errorHandler } = useErrorHandler()
   
   const projects = ref<Database['public']['Tables']['projects']['Row'][]>([])
-  const updates = ref<Database['public']['Tables']['project_updates']['Row'][]>([])
+  const updates = ref<any[]>([])
   const isLoading = ref(true)
+
+  // Computed for aggregate action items
+  const actionItems = computed(() => {
+    return updates.value.filter(u => u.requires_approval && u.status === 'pending')
+  })
 
   const fetchData = async () => {
     isLoading.value = true
@@ -25,15 +30,28 @@
         if (projError) throw projError
         if (projData) projects.value = projData
 
-        // Fetch recent updates
-        const { data: updateData, error: updateError } = await supabase
+        // Fetch recent updates (including all pending ones for action items)
+        // We'll fetch more than 10 to ensure we catch pending ones, or do a separate query.
+        // For simplicity, let's fetch all pending first, then recent 10.
+        const { data: pendingData } = await supabase
+            .from('project_updates')
+            .select('*, projects(name)')
+            .eq('requires_approval', true)
+            .eq('status', 'pending')
+
+        const { data: recentData, error: updateError } = await supabase
             .from('project_updates')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(10)
 
         if (updateError) throw updateError
-        if (updateData) updates.value = updateData
+        
+        // Combine them for the updates list, ensuring no duplicates
+        const combined = [...(pendingData || []), ...(recentData || [])]
+        const unique = combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i)
+        
+        updates.value = unique.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
 
     } catch (e: any) {
         errorHandler(e)
@@ -64,7 +82,37 @@
         <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-gray-500" />
     </div>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div v-else class="space-y-8">
+      <!-- /* ------------------------------- Action Items ------------------------------ */ -->
+      <section v-if="actionItems.length > 0" class="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-xl p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <UIcon name="i-lucide-list-todo" class="w-6 h-6 text-orange-500" />
+          <h2 class="text-xl font-bold text-orange-900 dark:text-orange-100">Action Required</h2>
+          <UBadge color="orange" variant="solid" size="xs" class="ml-2">{{ actionItems.length }}</UBadge>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UCard v-for="item in actionItems" :key="item.id" class="border-orange-200 dark:border-orange-800" :ui="{ body: { padding: 'p-4' } }">
+            <div class="flex items-start gap-3">
+              <UIcon :name="item.is_blocker ? 'i-lucide-octagon-alert' : 'i-lucide-clipboard-check'" class="w-5 h-5 flex-shrink-0" :class="item.is_blocker ? 'text-red-500' : 'text-orange-500'" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">{{ item.projects?.name }}</span>
+                  <UBadge v-if="item.is_blocker" color="red" variant="subtle" size="xs">BLOCKER</UBadge>
+                </div>
+                <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+                <div class="mt-3">
+                  <UButton size="xs" color="orange" variant="soft" :to="`/dashboard/projects/${item.project_id}`" block>
+                    Review & Respond
+                  </UButton>
+                </div>
+              </div>
+            </div>
+          </UCard>
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
       <!-- /* ------------------------------- Projects Column ------------------------------ */ -->
       <div class="lg:col-span-2 space-y-6">
@@ -128,6 +176,7 @@
         </UCard>
       </div>
 
+      </div>
     </div>
   </div>
 </template>

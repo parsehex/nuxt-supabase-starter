@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import type { Database } from '~/supabase/database.types';
+  import { BaseError } from '~/composables/use-error-handler';
 
   definePageMeta({
     layout: 'admin',
@@ -27,8 +28,18 @@
   const updateForm = reactive({
     title: '',
     description: '',
-    update_type: 'feature'
+    update_type: 'feature',
+    requires_approval: false,
+    is_blocker: false
   })
+
+  // Table status map
+  const statusColors = {
+    pending: 'orange',
+    approved: 'emerald',
+    rejected: 'red',
+    expired: 'gray'
+  }
 
   const updateTypes = [
     { label: 'Feature', value: 'feature' },
@@ -47,7 +58,7 @@
         .single()
         
     if (projectError) {
-        errorHandler(projectError)
+        errorHandler(new BaseError(projectError.code, projectError.message))
         return
     }
     
@@ -78,6 +89,9 @@
                 title: updateForm.title,
                 description: updateForm.description,
                 update_type: updateForm.update_type,
+                requires_approval: updateForm.requires_approval,
+                is_blocker: updateForm.is_blocker,
+                status: updateForm.requires_approval ? 'pending' : null,
                 author_id: user.value?.id
             })
 
@@ -86,11 +100,13 @@
         updateForm.title = ''
         updateForm.description = ''
         updateForm.update_type = 'feature'
+        updateForm.requires_approval = false
+        updateForm.is_blocker = false
         isUpdateModalOpen.value = false
         
         await fetchProjectDetails()
     } catch (e: any) {
-        errorHandler(e)
+        errorHandler(new BaseError(e.code, e.message))
     } finally {
         isPosting.value = false
     }
@@ -183,10 +199,19 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between gap-4">
-                                        <h4 class="text-base font-semibold dark:text-gray-200">{{ update.title }}</h4>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-base font-semibold dark:text-gray-200">{{ update.title }}</h4>
+                                            <UBadge v-if="update.requires_approval" :color="statusColors[update.status as keyof typeof statusColors]" variant="soft" size="xs">
+                                                {{ update.status?.toUpperCase() }}
+                                            </UBadge>
+                                            <UIcon v-if="update.is_blocker" name="i-lucide-octagon-alert" class="w-4 h-4 text-red-500" />
+                                        </div>
                                         <UButton color="red" variant="ghost" size="xs" icon="i-lucide-trash" class="opacity-0 group-hover:opacity-100 transition-opacity" @click="deleteUpdate(update.id)" />
                                     </div>
                                     <span class="text-xs text-primary font-medium mt-0.5 block">{{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}</span>
+                                    <p v-if="update.status === 'rejected' && update.rejection_comment" class="mt-2 text-xs bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded">
+                                        <strong>Rejection:</strong> {{ update.rejection_comment }}
+                                    </p>
                                     <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
                                         {{ update.description }}
                                     </p>
@@ -227,6 +252,13 @@
           <UFormGroup label="Description (Optional)">
             <UTextarea v-model="updateForm.description" :rows="4" placeholder="Add some context or patch notes..." />
           </UFormGroup>
+
+          <UDivider label="Approvals" />
+
+          <div class="space-y-2">
+            <UCheckbox v-model="updateForm.requires_approval" label="Requires Client Approval" />
+            <UCheckbox v-if="updateForm.requires_approval" v-model="updateForm.is_blocker" label="Mark as Blocker" color="red" />
+          </div>
           
           <div class="pt-4 flex justify-end gap-2">
             <UButton color="gray" variant="soft" @click="isUpdateModalOpen = false">Cancel</UButton>

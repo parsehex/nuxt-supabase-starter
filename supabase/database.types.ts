@@ -59,33 +59,58 @@ export type Database = {
       }
       project_updates: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           author_id: string | null
           created_at: string | null
           description: string | null
           id: string
+          is_blocker: boolean | null
           project_id: string
+          rejection_comment: string | null
+          requires_approval: boolean | null
+          status: Database["public"]["Enums"]["approval_status"] | null
           title: string
           update_type: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          is_blocker?: boolean | null
           project_id: string
+          rejection_comment?: string | null
+          requires_approval?: boolean | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
           title: string
           update_type?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
+          is_blocker?: boolean | null
           project_id?: string
+          rejection_comment?: string | null
+          requires_approval?: boolean | null
+          status?: Database["public"]["Enums"]["approval_status"] | null
           title?: string
           update_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_updates_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_updates_author_id_fkey"
             columns: ["author_id"]
@@ -178,6 +203,7 @@ export type Database = {
       is_system_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      approval_status: "pending" | "approved" | "rejected" | "expired"
       custom_role: "owner" | "member"
     }
     CompositeTypes: {
@@ -748,6 +774,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      approval_status: ["pending", "approved", "rejected", "expired"],
       custom_role: ["owner", "member"],
     },
   },
