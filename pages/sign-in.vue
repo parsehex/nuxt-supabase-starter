@@ -93,7 +93,7 @@
                   <img src="/favicon.png" class="h-[80px] rounded-lg">
                 </div>
 
-                <p class="text-lg font-bold text-center">Welcome to parsehex</p>
+                <p class="text-lg font-bold text-center">parsehex Client Portal</p>
 
                 <UFormGroup label="Email" name="email">
                   <UInput v-model="form.email" />
