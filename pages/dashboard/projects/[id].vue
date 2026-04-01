@@ -17,19 +17,19 @@
 
   const fetchProjectDetails = async () => {
     isLoading.value = true
-    
+
     // Fetch project
     const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select('*')
         .eq('id', projectId)
         .single()
-        
+
     if (projectError) {
         errorHandler(projectError)
         return
     }
-    
+
     project.value = projectData
 
     // Fetch updates
@@ -53,7 +53,7 @@
 
 <template>
   <div class="w-full mx-auto my-10 max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col h-full">
-    
+
     <div class="mb-4">
         <UButton variant="ghost" color="gray" icon="i-lucide-arrow-left" to="/dashboard/projects" size="sm">Back to Projects</UButton>
     </div>
@@ -63,7 +63,7 @@
     </div>
 
     <div v-else-if="project" class="flex-1">
-        
+
         <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-800 mb-6">
             <div>
                 <h1 class="text-3xl font-bold">{{ project.name }}</h1>
@@ -88,8 +88,8 @@
                         <UCard>
                             <div class="flex items-start gap-4">
                                 <div class="flex-shrink-0 mt-1">
-                                    <UIcon 
-                                        :name="update.update_type === 'feature' ? 'i-lucide-sparkles' : update.update_type === 'deployment' ? 'i-lucide-rocket' : 'i-lucide-message-square'" 
+                                    <UIcon
+                                        :name="update.update_type === 'feature' ? 'i-lucide-sparkles' : update.update_type === 'deployment' ? 'i-lucide-rocket' : 'i-lucide-message-square'"
                                         class="w-5 h-5"
                                         :class="update.update_type === 'feature' ? 'text-blue-500' : update.update_type === 'deployment' ? 'text-emerald-500' : 'text-gray-400'"
                                     />
@@ -125,8 +125,8 @@
                     </div>
                 </UCard>
 
-                <!-- Documents / Files Placeholder -->
-                <UCard class="w-full">
+                <!-- Documents / Files Placeholder (Hidden for now) -->
+                <UCard class="w-full hidden">
                     <template #header>
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold flex items-center gap-2">

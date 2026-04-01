@@ -19,11 +19,14 @@
   })
 
   onMounted(() => {
+    // Search listener disabled for now
+    /*
     document.addEventListener('keydown', function(event) {
       if (event.ctrlKey && event.key === '/') {
         isSearchOpen.value = !isSearchOpen.value
       }
     });
+    */
   })
 
   const linksTopNav = reactive([{
@@ -47,13 +50,13 @@
     to: '/admin/users'
   }])
 
-  const linksBottomNav = [{
+  const linksBottomNav = [/*{
     label: 'Search',
     icon: 'i-lucide-search',
     click: () => {
       isSearchOpen.value = true
     }
-  }, {
+  }, */{
     label: 'Exit Admin',
     icon: 'i-lucide-log-out',
     to: '/dashboard'
@@ -115,7 +118,7 @@
           <template #default="{ link }">
             <span class="group-hover:text-primary relative py-2 font-medium">
               {{ link.label }}
-              <UKbd value="ctrl + /" v-if="link.label == 'Search'" class="ml-2" />
+              <!-- <UKbd value="ctrl + /" v-if="link.label == 'Search'" class="ml-2" /> -->
             </span>
           </template>
           </UVerticalNavigation>
@@ -140,8 +143,10 @@
       <slot />
     </div>
 
+    <!-- Search modal disabled for now
     <UModal v-model="isSearchOpen">
       <SearchGlobal @close="isSearchOpen = false"></SearchGlobal>
     </UModal>
+    -->
   </div>
 </template>

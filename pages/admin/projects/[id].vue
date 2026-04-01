@@ -186,7 +186,7 @@
                                         <h4 class="text-base font-semibold dark:text-gray-200">{{ update.title }}</h4>
                                         <UButton color="red" variant="ghost" size="xs" icon="i-lucide-trash" class="opacity-0 group-hover:opacity-100 transition-opacity" @click="deleteUpdate(update.id)" />
                                     </div>
-                                    <span class="text-xs text-primary font-medium mt-0.5 block">{{ new Date(update.created_at).toLocaleString() }}</span>
+                                    <span class="text-xs text-primary font-medium mt-0.5 block">{{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}</span>
                                     <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
                                         {{ update.description }}
                                     </p>

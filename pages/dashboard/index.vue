@@ -115,7 +115,7 @@
                     <h4 class="text-sm font-semibold dark:text-gray-200">{{ update.title }}</h4>
                   </div>
                   <span class="text-xs text-primary font-medium mt-0.5 block">
-                    {{ new Date(update.created_at).toLocaleString() }}
+                    {{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}
                   </span>
                   <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
                     {{ update.description }}
