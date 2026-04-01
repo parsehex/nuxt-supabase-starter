@@ -215,34 +215,14 @@
                                     </div>
                                     <span class="text-xs text-primary font-medium mt-0.5 block">{{ update.created_at ? new Date(update.created_at).toLocaleString() : 'Unknown Date' }}</span>
 
-                                    <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line border-b border-gray-100 dark:border-gray-800 pb-4">
+                                    <p class="mt-3 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line pb-2">
                                         {{ update.description }}
                                     </p>
 
-                                    <!-- Conversation Thread (The discussion around the update) -->
-                                    <div class="mt-4 space-y-4">
-                                        
-                                        <!-- Message history -->
-                                        <div v-if="update.comments && update.comments.length > 0" class="space-y-3">
-                                            <div v-for="comment in update.comments" :key="comment.id" class="flex gap-3 text-xs">
-                                                <div class="flex-1 p-3 rounded-lg border" :class="{ 'border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30': comment.action_type === 'approved', 'border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/30': comment.action_type === 'rejected', 'border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30': comment.action_type === 'follow_up', 'border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/30': comment.action_type === 'resubmit', 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50': !comment.action_type }">
-                                                    <div class="flex items-center justify-between mb-2">
-                                                        <div class="flex items-center gap-2">
-                                                            <span class="font-bold text-gray-800 dark:text-gray-200">{{ comment.author?.full_name || 'System' }}</span>
-                                                            <UBadge v-if="comment.action_type" size="xs" variant="subtle" :color="comment.action_type === 'approved' ? 'emerald' : comment.action_type === 'rejected' ? 'red' : comment.action_type === 'follow_up' ? 'blue' : 'orange'">
-                                                                {{ comment.action_type.toUpperCase().replace('_', ' ') }}
-                                                            </UBadge>
-                                                        </div>
-                                                        <span class="text-[10px] text-gray-400">{{ new Date(comment.created_at).toLocaleString() }}</span>
-                                                    </div>
-                                                    <p class="text-sm dark:text-gray-300 whitespace-pre-wrap">{{ comment.content }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Approval Actions (Only when pending) -->
-                                        <div v-if="update.requires_approval && update.status === 'pending'" class="pt-2">
-                                            <div class="flex gap-2 mb-3">
+                                    <!-- Approval Actions (Only when pending) -->
+                                    <div v-if="update.requires_approval && update.status === 'pending'" class="mt-2 mb-4">
+                                        <h5 class="text-xs font-bold text-orange-600 dark:text-orange-500 uppercase tracking-wider mb-2 flex items-center gap-1.5"><UIcon name="i-lucide-clipboard-check" class="w-4 h-4" /> Feedback Requested</h5>
+                                        <div class="flex gap-2">
                                                 <UButton
                                                     size="xs"
                                                     :color="feedbackForm.activeUpdateId === update.id && feedbackForm.actionType === 'approved' ? 'emerald' : 'gray'"
@@ -273,7 +253,7 @@
                                             </div>
 
                                             <!-- Inline Feedback Form -->
-                                            <div v-if="feedbackForm.activeUpdateId === update.id" class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800 space-y-3 shadow-inner">
+                                            <div v-if="feedbackForm.activeUpdateId === update.id" class="mt-3 bg-gray-50 dark:bg-gray-900/80 p-4 rounded-lg border border-gray-200 dark:border-gray-800 space-y-3 shadow-inner">
                                                 <UFormGroup :label="feedbackForm.actionType === 'approved' ? 'Approval Note (Optional)' : feedbackForm.actionType === 'follow_up' ? 'What do you need clarified?' : 'Rejection Reason'">
                                                     <UTextarea
                                                         v-model="feedbackForm.comment"
@@ -295,10 +275,43 @@
                                                     </UButton>
                                                 </div>
                                             </div>
+                                    </div>
+
+                                    <!-- Conversation Thread (The discussion around the update) -->
+                                    <details class="group mt-2" :open="!update.requires_approval || update.status !== 'pending' || (update.comments && update.comments.length > 0)">
+                                        <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden py-2 focus:outline-none">
+                                            <UDivider>
+                                                <div class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer px-2">
+                                                    <UIcon name="i-lucide-message-square" class="w-4 h-4" />
+                                                    <span>{{ update.comments && update.comments.length > 0 ? 'Discussion' : 'Discuss' }}</span>
+                                                    <UIcon name="i-lucide-chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform" />
+                                                </div>
+                                            </UDivider>
+                                        </summary>
+                                        
+                                        <div class="mt-4 space-y-4 pt-1 mb-2">
+                                        
+                                        <!-- Message history -->
+                                        <div v-if="update.comments && update.comments.length > 0" class="space-y-3">
+                                            <div v-for="comment in update.comments" :key="comment.id" class="flex gap-3 text-xs">
+                                                <div class="flex-1 p-3 rounded-lg border" :class="{ 'border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30': comment.action_type === 'approved', 'border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/30': comment.action_type === 'rejected', 'border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30': comment.action_type === 'follow_up', 'border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/30': comment.action_type === 'resubmit', 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50': !comment.action_type }">
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-bold text-gray-800 dark:text-gray-200">{{ comment.author?.full_name || 'System' }}</span>
+                                                            <UBadge v-if="comment.action_type" size="xs" variant="subtle" :color="comment.action_type === 'approved' ? 'emerald' : comment.action_type === 'rejected' ? 'red' : comment.action_type === 'follow_up' ? 'blue' : 'orange'">
+                                                                {{ comment.action_type.toUpperCase().replace('_', ' ') }}
+                                                            </UBadge>
+                                                        </div>
+                                                        <span class="text-[10px] text-gray-400">{{ new Date(comment.created_at).toLocaleString() }}</span>
+                                                    </div>
+                                                    <p class="text-sm dark:text-gray-300 whitespace-pre-wrap">{{ comment.content }}</p>
+                                                </div>
+                                            </div>
                                         </div>
 
+
                                         <!-- General Reply (For any update without pending actions) -->
-                                        <div v-else class="pt-2">
+                                        <div class="pt-2">
                                             <div class="flex gap-2">
                                                 <UInput 
                                                     v-model="feedbackForm.comment" 
@@ -318,7 +331,8 @@
                                                 </UButton>
                                             </div>
                                         </div>
-                                    </div>
+                                        </div>
+                                    </details>
                                 </div>
                             </div>
                         </UCard>
