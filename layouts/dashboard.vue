@@ -44,13 +44,31 @@
     to: '/dashboard/files'
   }])
 
-  const linksBottomNav = [{
-    label: 'Search',
-    icon: 'i-lucide-search',
-    click: () => {
-      isSearchOpen.value = true
+  const { isSystemAdmin } = useProfile()
+
+  const linksBottomNav = computed(() => {
+    const base: any[] = [{
+      label: 'Search',
+      icon: 'i-lucide-search',
+      click: () => {
+        isSearchOpen.value = true
+      }
+    }]
+
+    if (isSystemAdmin.value) {
+      base.unshift({
+        label: 'System Users',
+        icon: 'i-lucide-user-cog',
+        to: '/dashboard/admin/users'
+      }, {
+        label: 'Clients',
+        icon: 'i-lucide-building-2',
+        to: '/dashboard/admin/clients'
+      })
     }
-  }]
+
+    return base
+  })
 
   const signOut = async() => {
     await authAction.signOut();
@@ -58,7 +76,9 @@
   }
 
   onMounted(() => {
-    onClickOutside(document.getElementById('#menu-admin-top'), (event) => console.log(event))
+    if (document.getElementById('#menu-admin-top')) {
+      onClickOutside(document.getElementById('#menu-admin-top'), (event) => console.log(event))
+    }
   })
 </script>
 
