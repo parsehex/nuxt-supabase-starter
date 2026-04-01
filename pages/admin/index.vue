@@ -15,13 +15,14 @@
   const { errorHandler } = useErrorHandler()
 
   const pendingApprovals = ref<any[]>([])
+  const needsAttention = ref<any[]>([])
   const recentActivity = ref<any[]>([])
   const isLoading = ref(true)
 
   const fetchData = async () => {
     try {
       isLoading.value = true
-
+      
       // 1. Fetch all pending client approvals
       const { data: pendingData, error: pendingError } = await supabase
         .from('project_updates')
@@ -33,7 +34,17 @@
       if (pendingError) throw pendingError
       pendingApprovals.value = pendingData || []
 
-      // 2. Fetch recent client activity (Approved/Rejected)
+      // 2. Fetch updates that need attention (Follow-ups)
+      const { data: attentionData, error: attentionError } = await supabase
+        .from('project_updates')
+        .select('*, projects(name, clients(name))')
+        .eq('status', 'follow_up')
+        .order('created_at', { ascending: false })
+
+      if (attentionError) throw attentionError
+      needsAttention.value = attentionData || []
+
+      // 3. Fetch recent client activity (Approved/Rejected)
       const { data: activityData, error: activityError } = await supabase
         .from('project_updates')
         .select(`
@@ -60,6 +71,7 @@
     switch (status) {
       case 'approved': return 'emerald'
       case 'rejected': return 'red'
+      case 'follow_up': return 'blue'
       case 'expired': return 'gray'
       case 'pending': return 'orange'
       default: return 'primary'
@@ -86,6 +98,39 @@
 
     <!-- Live Activity Sections -->
     <div v-if="!isLoading" class="mt-8 space-y-8">
+
+      <!-- 0. Needs Attention (Follow-ups) -->
+      <section v-if="needsAttention.length > 0" class="space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <UIcon name="i-lucide-message-square-more" class="w-5 h-5 text-blue-500" />
+          Needs Attention
+          <UBadge color="blue" variant="solid" size="xs" class="ml-2">{{ needsAttention.length }}</UBadge>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UCard v-for="item in needsAttention" :key="item.id" class="border-blue-100 dark:border-blue-950 bg-blue-50/30 dark:bg-blue-900/10" :ui="{ body: { padding: 'p-4' } }">
+            <div class="flex items-start gap-4">
+              <UIcon name="i-lucide-help-circle" class="w-5 h-5 flex-shrink-0 text-blue-500" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">{{ item.projects?.clients?.name }}</span>
+                  <UBadge color="blue" variant="subtle" size="xs">QUESTION</UBadge>
+                </div>
+                <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+                <div v-if="item.client_feedback" class="mt-2 text-[11px] p-2 bg-blue-100/50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded border border-blue-200 dark:border-blue-800 line-clamp-2">
+                  "{{ item.client_feedback }}"
+                </div>
+                <p v-else class="text-xs text-gray-500 mt-1 italic">Waiting for your response...</p>
+                <div class="mt-3">
+                  <UButton size="xs" color="blue" variant="soft" icon="i-lucide-reply" :to="`/admin/projects/${item.project_id}`" block>
+                    Respond
+                  </UButton>
+                </div>
+              </div>
+            </div>
+          </UCard>
+        </div>
+      </section>
 
       <!-- 1. Pending Approvals -->
       <section v-if="pendingApprovals.length > 0" class="space-y-4">
@@ -133,9 +178,9 @@
               <div class="flex items-center justify-between gap-4">
                 <div class="flex items-center gap-4 flex-1">
                   <UIcon
-                    :name="activity.status === 'approved' ? 'i-lucide-check-circle' : 'i-lucide-x-circle'"
+                    :name="activity.status === 'approved' ? 'i-lucide-check-circle' : activity.status === 'rejected' ? 'i-lucide-x-circle' : 'i-lucide-help-circle'"
                     class="w-6 h-6"
-                    :class="activity.status === 'approved' ? 'text-emerald-500' : 'text-red-500'"
+                    :class="activity.status === 'approved' ? 'text-emerald-500' : activity.status === 'rejected' ? 'text-red-500' : 'text-blue-500'"
                   />
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium">
@@ -146,7 +191,7 @@
                     <p class="text-xs text-gray-400">
                       {{ activity.projects?.clients?.name }} • {{ activity.projects?.name }}
                     </p>
-                    <p v-if="activity.client_feedback" class="mt-2 text-xs p-2 rounded" :class="activity.status === 'rejected' ? 'text-red-500 bg-red-50 dark:bg-red-950' : 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950'">
+                    <p v-if="activity.client_feedback" class="mt-2 text-xs p-2 rounded" :class="activity.status === 'rejected' ? 'text-red-500 bg-red-50 dark:bg-red-950' : activity.status === 'approved' ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950' : 'text-blue-500 bg-blue-50 dark:bg-blue-950'">
                       "{{ activity.client_feedback }}"
                     </p>
                   </div>

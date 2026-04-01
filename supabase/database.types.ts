@@ -156,6 +156,45 @@ export type Database = {
           },
         ]
       }
+      update_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          update_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          update_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          update_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "update_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "update_comments_update_id_fkey"
+            columns: ["update_id"]
+            isOneToOne: false
+            referencedRelation: "project_updates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           client_id: string | null
@@ -203,7 +242,12 @@ export type Database = {
       is_system_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      approval_status: "pending" | "approved" | "rejected" | "expired"
+      approval_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "expired"
+        | "follow_up"
       custom_role: "owner" | "member"
     }
     CompositeTypes: {
@@ -774,7 +818,13 @@ export const Constants = {
   },
   public: {
     Enums: {
-      approval_status: ["pending", "approved", "rejected", "expired"],
+      approval_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "follow_up",
+      ],
       custom_role: ["owner", "member"],
     },
   },
